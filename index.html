@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Vaibhav Laxmi provision Store</title>
+
+<style>
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+  font-family:Arial,sans-serif;
+}
+
+body{
+  background:#f5f6f8;
+  color:#222;
+}
+
+/* HEADER */
+header{
+  background:#198754;
+  color:white;
+  padding:15px;
+  position:sticky;
+  top:0;
+  z-index:100;
+}
+
+.header{
+  max-width:1100px;
+  margin:auto;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+
+.logo{
+  font-size:21px;
+  font-weight:bold;
+}
+
+.cart-btn{
+  background:white;
+  color:#198754;
+  border:0;
+  border-radius:25px;
+  padding:10px 16px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+/* HERO */
+.hero{
+  background:white;
+  text-align:center;
+  padding:30px 15px;
+}
+
+.hero h1{
+  color:#198754;
+  margin-bottom:8px;
+}
+
+.hero p{
+  color:#666;
+}
+
+/* SEARCH */
+.search-box{
+  max-width:700px;
+  margin:20px auto;
+  padding:0 15px;
+}
+
+.search-box input{
+  width:100%;
+  padding:14px;
+  border:1px solid #ddd;
+  border-radius:10px;
+  font-size:16px;
+}
+
+/* CATEGORIES */
+.categories{
+  max-width:1100px;
+  margin:10px auto;
+  padding:0 15px;
+  display:flex;
+  gap:8px;
+  overflow-x:auto;
+}
+
+.categories button{
+  border:0;
+  background:white;
+  padding:10px 15px;
+  border-radius:20px;
+  white-space:nowrap;
+  cursor:pointer;
+}
+
+.categories button.active{
+  background:#198754;
+  color:white;
+}
+
+/* PRODUCTS */
+.container{
+  max-width:1100px;
+  margin:auto;
+  padding:20px 15px;
+}
+
+.products{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  gap:15px;
+}
+
+.card{
+  background:white;
+  border-radius:12px;
+  padding:15px;
+  box-shadow:0 2px 8px rgba(0,0,0,.08);
+}
+
+.emoji{
+  font-size:45px;
+  text-align:center;
+  padding:10px;
+}
+
+.card h3{
+  font-size:16px;
+  margin:8px 0;
+}
+
+.unit{
+  color:#777;
+  font-size:13px;
+}
+
+.price{
+  color:#198754;
+  font-size:19px;
+  font-weight:bold;
+  margin:8px 0;
+}
+
+.add{
+  width:100%;
+  background:#198754;
+  color:white;
+  border:0;
+  padding:10px;
+  border-radius:8px;
+  cursor:pointer;
+}
+
+/* CART */
+.cart{
+  position:fixed;
+  right:-400px;
+  top:0;
+  width:360px;
+  max-width:95%;
+  height:100%;
+  background:white;
+  z-index:1000;
+  box-shadow:-5px 0 15px rgba(0,0,0,.2);
+  padding:20px;
+  transition:.3s;
+  overflow:auto;
+}
+
+.cart.open{
+  right:0;
+}
+
+.cart-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:20px;
+}
+
+.close{
+  border:0;
+  background:#eee;
+  border-radius:50%;
+  width:35px;
+  height:35px;
+  cursor:pointer;
+}
+
+.cart-item{
+  border-bottom:1px solid #ddd;
+  padding:12px 0;
+}
+
+.cart-item strong{
+  display:block;
+  margin-bottom:5px;
+}
+
+.qty{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.qty button{
+  width:30px;
+  height:30px;
+  border:0;
+  background:#198754;
+  color:white;
+  border-radius:5px;
+}
+
+.total{
+  font-size:20px;
+  font-weight:bold;
+  margin:20px 0;
+}
+
+.whatsapp{
+  width:100%;
+  background:#25D366;
+  color:white;
+  border:0;
+  padding:14px;
+  border-radius:8px;
+  font-size:16px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.empty{
+  text-align:center;
+  color:#777;
+  padding:30px;
+}
+
+/* FOOTER */
+footer{
+  background:#222;
+  color:white;
+  text-align:center;
+  padding:25px;
+  margin-top:30px;
+}
+
+@media(max-width:500px){
+  .logo{
+    font-size:17px;
+  }
+
+  .products{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .card{
+    padding:10px;
+  }
+
+  .cart{
+    width:100%;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="header">
+    <div class="logo">🛒 Vaibhav Laxmi Store</div>
+    <button class="cart-btn" onclick="openCart()">
+      🛍️ Cart (<span id="cartCount">0</span>)
+    </button>
+  </div>
+</header>
+
+<section class="hero">
+  <h1>Vaibhav Laxmi provision Store</h1>
+  <p>Daily Grocery Products at Best Prices</p>
+</section>
+
+<div class="search-box">
+  <input
+    type="text"
+    id="search"
+    placeholder="🔍 Search product..."
+    oninput="showProducts()"
+  >
+</div>
+
+<div class="categories" id="categories"></div>
+
+<div class="container">
+  <h2 style="margin-bottom:15px;">🛒 Our Products</h2>
+  <div class="products" id="products"></div>
+</div>
+
+<footer>
+  <h3>Vaibhav Laxmi provision Store</h3>
+  <p>📞 7276711309</p>
+  <p>Order on WhatsApp</p>
+</footer>
+
+<!-- CART -->
+<div class="cart" id="cart">
+
+  <div class="cart-header">
+    <h2>🛒 Your Cart</h2>
+    <button class="close" onclick="closeCart()">✕</button>
+  </div>
+
+  <div id="cartItems"></div>
+
+  <div class="total">
+    Total: ₹<span id="total">0</span>
+  </div>
+
+  <button class="whatsapp" onclick="sendWhatsApp()">
+    📱 Order on WhatsApp
+  </button>
+
+</div>
+
+<script>
+
+/* PRODUCTS */
+
+const products = [
+
+["Basmati Rice","1 kg",120,"Atta & Rice","🌾"],
+["Basmati Rice","5 kg",500,"Atta & Rice","🌾"],
+["Aashirvaad Atta","5 kg",290,"Atta & Rice","🌾"],
+["Poha","500 g",35,"Atta & Rice","🌾"],
+["Poha","1 kg",65,"Atta & Rice","🌾"],
+["Suji Packed","500 g",35,"Atta & Rice","🌾"],
+["Suji Packed","1 kg",70,"Atta & Rice","🌾"],
+["Maida Packed","500 g",35,"Atta & Rice","🌾"],
+["Maida Packed","1 kg",70,"Atta & Rice","🌾"],
+["Besan","500 g",70,"Atta & Rice","🌾"],
+["Besan","1 kg",119,"Atta & Rice","🌾"],
+["Daliya","500 g",60,"Atta & Rice","🌾"],
+["Daliya","1 kg",119,"Atta & Rice","🌾"],
+
+["Moong Dal","500 g",70,"Dal & Pulses","🥣"],
+["Moong Dal","1 kg",139,"Dal & Pulses","🥣"],
+["Toor Dal","500 g",70,"Dal & Pulses","🥣"],
+["Toor Dal","1 kg",139,"Dal & Pulses","🥣"],
+["Toor Dal","5 kg",690,"Dal & Pulses","🥣"],
+["Masoor Dal","500 g",48,"Dal & Pulses","🥣"],
+["Masoor Dal","1 kg",96,"Dal & Pulses","🥣"],
+["Masoor Dal","5 kg",470,"Dal & Pulses","🥣"],
+["Lal Chana","1 kg",96,"Dal & Pulses","🥣"],
+["Chana Dal","1 kg",94,"Dal & Pulses","🥣"],
+["Urad Dal","1 kg",139,"Dal & Pulses","🥣"],
+["Rajma","500 g",90,"Dal & Pulses","🥣"],
+["Kabuli Chana","1 kg",140,"Dal & Pulses","🥣"],
+
+["Tata Salt","1 kg",32,"Oil & Masala","🧂"],
+["Sugar","1 kg",59,"Oil & Masala","🧂"],
+["Jaggery","1 kg",89,"Oil & Masala","🟤"],
+["Black Salt","100 g",15,"Oil & Masala","🧂"],
+["Rock Salt","1 kg",90,"Oil & Masala","🧂"],
+["Red Chilli Powder","100 g",64,"Oil & Masala","🌶️"],
+["Red Chilli Powder","200 g",128,"Oil & Masala","🌶️"],
+["Coriander Powder","100 g",42,"Oil & Masala","🌿"],
+["Garam Masala","50 g",56,"Oil & Masala","🌿"],
+["Black Pepper","50 g",48,"Oil & Masala","🌿"],
+["Elaichi","10 g",49,"Oil & Masala","🌿"],
+["Turmeric Powder","200 g",65,"Oil & Masala","🌿"],
+["Sunflower Oil","1 L",145,"Oil & Masala","🫙"],
+["Mustard Oil","1 L",189,"Oil & Masala","🫙"],
+["Groundnut Oil","1 L",175,"Oil & Masala","🫙"],
+["Amul Ghee","500 g",335,"Oil & Masala","🧈"],
+["Amul Ghee","1 kg",670,"Oil & Masala","🧈"],
+
+["Parle-G","800 g",80,"Snacks","🍪"],
+["Good Day","Pack",10,"Snacks","🍪"],
+["Marie Gold","Pack",10,"Snacks","🍪"],
+["Hide & Seek","Pack",10,"Snacks","🍪"],
+["KrackJack","Pack",10,"Snacks","🍪"],
+["Kurkure","Pack",10,"Snacks","🥨"],
+["Lays","Pack",10,"Snacks","🥔"],
+["Potato Chips","100 g",30,"Snacks","🥔"],
+["Lijjat Papad","100 g",42,"Snacks","🥨"],
+["Tomato Ketchup","500 g",15,"Snacks","🍅"],
+["Green Chilli Sauce","200 g",25,"Snacks","🌶️"],
+
+["Coca-Cola","750 ml",45,"Beverages","🥤"],
+["Tea","250 g",125,"Beverages","☕"],
+
+["Milk","1 L",62,"Dairy","🥛"],
+["Curd","500 g",40,"Dairy","🥣"],
+["Paneer","200 g",95,"Dairy","🧀"],
+["Butter","100 g",63,"Dairy","🧈"],
+["Buttermilk","500 ml",20,"Dairy","🥛"],
+["Amul Taaza","1 L",59,"Dairy","🥛"],
+["Amul Gold","500 g",36,"Dairy","🥛"],
+["Amul Dahi","Pack",10,"Dairy","🥣"],
+
+["Surf Excel","1 kg",73,"Household","🧺"],
+["Vim Dishwash","500 g",140,"Household","🧽"],
+["Vim Dishwash","₹15 Pack",15,"Household","🧽"],
+["Vim Dishwash","₹25 Pack",25,"Household","🧽"],
+["Harpic","500 g",110,"Household","🧴"],
+["Colgate Toothpaste","100 g",129,"Household","🪥"]
+
+];
+
+
+/* CART */
+
+let cart = [];
+let selectedCategory = "All";
+
+
+/* SHOW CATEGORIES */
+
+function showCategories(){
+
+  const box = document.getElementById("categories");
+
+  const categoryList = [
+    "All",
+    ...new Set(products.map(p => p[3]))
+  ];
+
+  box.innerHTML = "";
+
+  categoryList.forEach(category => {
+
+    const button = document.createElement("button");
+
+    button.innerText = category;
+
+    if(category === selectedCategory){
+      button.classList.add("active");
+    }
+
+    button.onclick = function(){
+      selectedCategory = category;
+      showCategories();
+      showProducts();
+    };
+
+    box.appendChild(button);
+
+  });
+
+}
+
+
+/* SHOW PRODUCTS */
+
+function showProducts(){
+
+  const box = document.getElementById("products");
+
+  const searchText =
+    document.getElementById("search").value.toLowerCase();
+
+  box.innerHTML = "";
+
+  const filtered = products.filter(p => {
+
+    const matchSearch =
+      p[0].toLowerCase().includes(searchText);
+
+    const matchCategory =
+      selectedCategory === "All" ||
+      p[3] === selectedCategory;
+
+    return matchSearch && matchCategory;
+
+  });
+
+  if(filtered.length === 0){
+
+    box.innerHTML =
+      '<div class="empty">❌ Product nahi mila</div>';
+
+    return;
+
+  }
+
+  filtered.forEach((p,index) => {
+
+    const realIndex = products.indexOf(p);
+
+    box.innerHTML += `
+
+      <div class="card">
+
+        <div class="emoji">${p[4]}</div>
+
+        <h3>${p[0]}</h3>
+
+        <div class="unit">${p[1]}</div>
+
+        <div class="price">₹${p[2]}</div>
+
+        <button class="add"
+          onclick="addCart(${realIndex})">
+          ➕ Add to Cart
+        </button>
+
+      </div>
+
+    `;
+
+  });
+
+}
+
+
+/* ADD CART */
+
+function addCart(index){
+
+  const product = products[index];
+
+  const existing = cart.find(
+    item => item.index === index
+  );
+
+  if(existing){
+
+    existing.qty++;
+
+  }else{
+
+    cart.push({
+      index:index,
+      qty:1
+    });
+
+  }
+
+  updateCart();
+
+  alert(product[0] + " cart mein add ho gaya ✅");
+
+}
+
+
+/* UPDATE CART */
+
+function updateCart(){
+
+  document.getElementById("cartCount").innerText =
+    cart.reduce((sum,item)=>sum + item.qty,0);
+
+  const box = document.getElementById("cartItems");
+
+  box.innerHTML = "";
+
+  let total = 0;
+
+  if(cart.length === 0){
+
+    box.innerHTML =
+      '<div class="empty">🛒 Cart empty hai</div>';
+
+  }
+
+  cart.forEach(item => {
+
+    const p = products[item.index];
+
+    const itemTotal = p[2] * item.qty;
+
+    total += itemTotal;
+
+    box.innerHTML += `
+
+      <div class="cart-item">
+
+        <strong>
+          ${p[4]} ${p[0]}
+        </strong>
+
+        <div>${p[1]} — ₹${p[2]}</div>
+
+        <div class="qty">
+
+          <button onclick="changeQty(${item.index},-1)">
+            −
+          </button>
+
+          <span>${item.qty}</span>
+
+          <button onclick="changeQty(${item.index},1)">
+            +
+          </button>
+
+          <span>
+            = ₹${itemTotal}
+          </span>
+
+        </div>
+
+      </div>
+
+    `;
+
+  });
+
+  document.getElementById("total").innerText = total;
+
+}
+
+
+/* CHANGE QUANTITY */
+
+function changeQty(index,change){
+
+  const item = cart.find(
+    item => item.index === index
+  );
+
+  if(!item) return;
+
+  item.qty += change;
+
+  if(item.qty <= 0){
+
+    cart = cart.filter(
+      item => item.index !== index
+    );
+
+  }
+
+  updateCart();
+
+}
+
+
+/* OPEN CART */
+
+function openCart(){
+
+  document.getElementById("cart")
+    .classList.add("open");
+
+}
+
+
+/* CLOSE CART */
+
+function closeCart(){
+
+  document.getElementById("cart")
+    .classList.remove("open");
+
+}
+
+
+/* WHATSAPP ORDER */
+
+function sendWhatsApp(){
+
+  if(cart.length === 0){
+
+    alert("Pehle cart mein product add karo.");
+
+    return;
+
+  }
+
+  let message =
+    "🛒 *Vaibhav Laxmi provision Store Order*%0A%0A";
+
+  let total = 0;
+
+  cart.forEach(item => {
+
+    const p = products[item.index];
+
+    const itemTotal = p[2] * item.qty;
+
+    total += itemTotal;
+
+    message +=
+      `${p[0]} - ${p[1]} x ${item.qty} = ₹${itemTotal}%0A`;
+
+  });
+
+  message +=
+    `%0A💰 *Total: ₹${total}*`;
+
+  const url =
+    "https://wa.me/917276711309?text=" + message;
+
+  window.open(url,"_blank");
+
+}
+
+
+/* START */
+
+showCategories();
+showProducts();
+updateCart();
+
+</script>
+
+</body>
+</html>
