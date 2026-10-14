@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vaibhav Laxmi provision Store</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif}
+body{background:#f5f6f5;color:#222}
+header{background:#198754;color:white;padding:15px;position:sticky;top:0;z-index:10}
+.head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+header h2{font-size:18px}
+button{cursor:pointer;border:0;border-radius:7px;padding:10px 14px;font-weight:bold}
+.cart-btn{background:white;color:#198754}
+.hero{background:#198754;color:white;padding:25px 15px;text-align:center}
+.hero h1{font-size:24px;margin-bottom:8px}
+.search{padding:15px}
+.search input,.checkout input,.checkout select{
+ width:100%;padding:12px;margin:7px 0;border:1px solid #ccc;border-radius:7px;font-size:15px
+}
+.categories{display:flex;gap:8px;overflow-x:auto;padding:0 15px 15px}
+.categories button{white-space:nowrap;background:#e5e5e5}
+.categories button.active{background:#198754;color:white}
+.products{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:12px}
+.product{background:white;padding:12px;border-radius:10px;box-shadow:0 2px 6px #0001;text-align:center}
+.emoji{font-size:40px;margin:8px}
+.product h3{font-size:15px;min-height:36px}
+.price{font-size:18px;color:#198754;font-weight:bold;margin:8px}
+.product button{background:#198754;color:white;width:100%}
+.cart,.checkout{background:white;margin:15px;padding:15px;border-radius:10px}
+.cart h2,.checkout h2{margin-bottom:10px}
+.cart-item{display:flex;justify-content:space-between;gap:8px;padding:10px 0;border-bottom:1px solid #ddd}
+.cart-item button{padding:5px 10px;background:#eee}
+.total{font-size:17px;font-weight:bold;margin:12px 0}
+.qr{display:none;text-align:center;padding:10px}
+.qr img{width:220px;max-width:100%;margin:10px auto}
+#screenshotPreview{max-width:100%;max-height:200px;display:none;margin:10px auto}
+.confirm{width:100%;background:#198754;color:white;font-size:17px;margin-top:12px}
+.location-btn{background:#0d6efd;color:white;width:100%;margin:8px 0}
+.note{font-size:13px;color:#666;margin:8px 0;line-height:1.5}
+.status{font-size:14px;color:#198754;font-weight:bold;margin:8px 0}
+footer{text-align:center;padding:20px;color:#666}
+@media(min-width:700px){.products{grid-template-columns:repeat(4,1fr)}}
+</style>
+</head>
+<body>
+
+<header>
+ <div class="head">
+  <h2>🛒 Vaibhav Laxmi provision Store</h2>
+  <button class="cart-btn" onclick="document.getElementById('cart').scrollIntoView()">Cart 🛒 <span id="count">0</span></button>
+ </div>
+</header>
+
+<section class="hero">
+ <h1>Welcome to Vaibhav Laxmi Store</h1>
+ <p>Ghar baithe grocery order karein!</p>
+</section>
+
+<div class="search">
+ <input id="search" placeholder="🔍 Search products..." oninput="showProducts()">
+</div>
+
+<div class="categories">
+ <button class="active" onclick="setCategory('All',this)">All</button>
+ <button onclick="setCategory('Atta & Rice',this)">Atta & Rice</button>
+ <button onclick="setCategory('Dal & Pulses',this)">Dal & Pulses</button>
+ <button onclick="setCategory('Oil & Masala',this)">Oil & Masala</button>
+ <button onclick="setCategory('Snacks',this)">Snacks</button>
+ <button onclick="setCategory('Beverages',this)">Beverages</button>
+ <button onclick="setCategory('Dairy',this)">Dairy</button>
+</div>
+
+<div class="products" id="products"></div>
+
+<section class="cart" id="cart">
+ <h2>🛒 Your Cart</h2>
+ <div id="cartItems">Cart is empty</div>
+ <div class="total">Subtotal: ₹<span id="subtotal">0</span></div>
+</section>
+
+<section class="checkout">
+ <h2>📦 Checkout</h2>
+ <input id="customerName" placeholder="Your Name">
+ <input id="phone" type="tel" placeholder="Mobile Number">
+ <input id="address" placeholder="Full Delivery Address">
+
+ <h3>Payment Method</h3>
+ <select id="payment" onchange="updateBill()">
+  <option value="">Select Payment Method</option>
+  <option value="Online Payment">Online Payment</option>
+  <option value="Cash on Delivery">Cash on Delivery</option>
+ </select>
+
+ <div id="qr" class="qr">
+  <h3>Scan QR to Pay</h3>
+  <p>UPI ID: gpay-12200771535@okbizaxis</p>
+  <p class="note">Payment karne ke baad screenshot upload karein.</p>
+  <img src="YOUR_QR_IMAGE_URL" alt="Payment QR Code">
+  <input type="file" id="screenshot" accept="image/*" onchange="previewScreenshot()">
+  <img id="screenshotPreview" alt="Payment screenshot preview">
+ </div>
+
+ <h3>Delivery Distance</h3>
+ <p class="note">Apni current location detect karne ke liye neeche button dabayein.</p>
+ <button class="location-btn" onclick="detectLocation()">📍 Detect My Location</button>
+ <div class="status" id="locationStatus">Location abhi detect nahi hui.</div>
+ <div class="note">Shop: Shop No. 23, Vinay Kutir Phase 2, Tirupati Nagar, Virar West</div>
+ <div class="total">Distance: <span id="distanceText">Not detected</span></div>
+ <div class="total">Delivery: ₹<span id="delivery">0</span></div>
+ <div class="note" id="deliveryMessage">₹199 ya usse zyada shopping par free delivery.</div>
+ <div class="total">Grand Total: ₹<span id="grandTotal">0</span></div>
+
+ <button class="confirm" onclick="confirmOrder()">✅ Confirm Your Order</button>
+ <p class="note">Online payment ko apne UPI/bank app mein verify karein. Screenshot payment ka automatic proof nahi hai.</p>
+</section>
+
+<footer>🛒 Easy & Fast Grocery Ordering</footer>
+
+<script>
+const WHATSAPP = "917276711309";
+const FREE_DELIVERY_LIMIT = 199;
+
+const SHOP_ADDRESS =
+"Shop No. 23, Vinay Kutir Phase 2, Tirupati Nagar, Virar West, Maharashtra, India";
+
+const products = [
+["Aashirvaad Atta 5 kg",290,"Atta & Rice","🌾"],
+["Basmati Rice 1 kg",120,"Atta & Rice","🍚"],
+["Basmati Rice 5 kg",500,"Atta & Rice","🍚"],
+["Poha 500g",35,"Atta & Rice","🌾"],
+["Poha 1 kg",65,"Atta & Rice","🌾"],
+["Suji Packed 500g",35,"Atta & Rice","🌾"],
+["Suji Packed 1 kg",70,"Atta & Rice","🌾"],
+["Maida Packed 500g",35,"Atta & Rice","🌾"],
+["Maida Packed 1 kg",70,"Atta & Rice","🌾"],
+["Besan 500g",70,"Atta & Rice","🌾"],
+["Besan 1 kg",119,"Atta & Rice","🌾"],
+["Daliya 500g",60,"Atta & Rice","🌾"],
+["Daliya 1 kg",119,"Atta & Rice","🌾"],
+["Loose Suji 250g",15,"Atta & Rice","🌾"],
+["Loose Suji 500g",29,"Atta & Rice","🌾"],
+["Loose Suji 1 kg",59,"Atta & Rice","🌾"],
+["Loose Maida 250g",15,"Atta & Rice","🌾"],
+["Loose Maida 500g",30,"Atta & Rice","🌾"],
+["Loose Maida 1 kg",55,"Atta & Rice","🌾"],
+["Loose Maida 5 kg",250,"Atta & Rice","🌾"],
+["Seviyan 100g",22,"Atta & Rice","🍜"],
+["Noodles Pack",10,"Atta & Rice","🍜"],
+["Sabudana 250g",25,"Atta & Rice","⚪"],
+["Sabudana 1 kg",96,"Atta & Rice","⚪"],
+
+["Chana Dal 1 kg",94,"Dal & Pulses","🫘"],
+["Urad Dal 1 kg",139,"Dal & Pulses","🫘"],
+["Rajma 250g",45,"Dal & Pulses","🫘"],
+["Rajma 500g",90,"Dal & Pulses","🫘"],
+["Kabuli Chana 250g",35,"Dal & Pulses","🫘"],
+["Kabuli Chana 500g",70,"Dal & Pulses","🫘"],
+["Kabuli Chana 1 kg",140,"Dal & Pulses","🫘"],
+["Lal Chana 1 kg",96,"Dal & Pulses","🫘"],
+["Lal Chana 5 kg",470,"Dal & Pulses","🫘"],
+["Moong Dal 500g",70,"Dal & Pulses","🫘"],
+["Moong Dal 1 kg",139,"Dal & Pulses","🫘"],
+["Masoor Dal 500g",48,"Dal & Pulses","🫘"],
+["Masoor Dal 1 kg",96,"Dal & Pulses","🫘"],
+["Masoor Dal 5 kg",470,"Dal & Pulses","🫘"],
+["Toor Dal 500g",70,"Dal & Pulses","🫘"],
+["Toor Dal 1 kg",139,"Dal & Pulses","🫘"],
+["Toor Dal 5 kg",690,"Dal & Pulses","🫘"],
+["Green Moong 500g",60,"Dal & Pulses","🫘"],
+["Green Moong 1 kg",119,"Dal & Pulses","🫘"],
+["Chole 500g",70,"Dal & Pulses","🫘"],
+["Chole 1 kg",139,"Dal & Pulses","🫘"],
+
+["Tata Salt 1 kg",32,"Oil & Masala","🧂"],
+["Sugar 1 kg",59,"Oil & Masala","🍚"],
+["Jaggery 500g",45,"Oil & Masala","🍯"],
+["Jaggery 1 kg",89,"Oil & Masala","🍯"],
+["Black Salt 100g",15,"Oil & Masala","🧂"],
+["Rock Salt 100g",20,"Oil & Masala","🧂"],
+["Rock Salt 1 kg",90,"Oil & Masala","🧂"],
+["Red Chilli Powder 100g",64,"Oil & Masala","🌶️"],
+["Red Chilli Powder 200g",128,"Oil & Masala","🌶️"],
+["Coriander Powder 100g",42,"Oil & Masala","🌿"],
+["Coriander Powder 250g",115,"Oil & Masala","🌿"],
+["Garam Masala 50g",56,"Oil & Masala","🌶️"],
+["Rai 100g",20,"Oil & Masala","🌿"],
+["Rai 1 kg",119,"Oil & Masala","🌿"],
+["Black Pepper 50g",48,"Oil & Masala","🌶️"],
+["Elaichi 10g",49,"Oil & Masala","🌿"],
+["Laung 100g",139,"Oil & Masala","🌿"],
+["Dalchini 50g",60,"Oil & Masala","🌿"],
+["Turmeric Powder 200g",65,"Oil & Masala","🌿"],
+["Sunflower Oil 1L",145,"Oil & Masala","🛢️"],
+["Mustard Oil 1L",189,"Oil & Masala","🛢️"],
+["Groundnut Oil 1L",175,"Oil & Masala","🛢️"],
+["Amul Ghee 500g",335,"Oil & Masala","🧈"],
+["Amul Ghee 1 kg",670,"Oil & Masala","🧈"],
+["Madhuvan Ghee 200g",186,"Oil & Masala","🧈"],
+["Madhuvan Ghee 500g",380,"Oil & Masala","🧈"],
+["Madhuvan Ghee 1 kg",720,"Oil & Masala","🧈"],
+["Govardhan Ghee 200g",205,"Oil & Masala","🧈"],
+["Govardhan Ghee 500g",459,"Oil & Masala","🧈"],
+["Govardhan Ghee 1 kg",859,"Oil & Masala","🧈"],
+["Coconut Oil 175g",115,"Oil & Masala","🛢️"],
+["Coconut Oil 100g",58,"Oil & Masala","🛢️"],
+
+["Good Day Biscuit ₹10",10,"Snacks","🍪"],
+["Marie Gold ₹10",10,"Snacks","🍪"],
+["Marie Gold ₹40",40,"Snacks","🍪"],
+["Hide & Seek ₹10",10,"Snacks","🍪"],
+["KrackJack ₹10",10,"Snacks","🍪"],
+["Kurkure ₹10",10,"Snacks","🍟"],
+["Lays ₹10",10,"Snacks","🍟"],
+["Lijjat Papad 100g Small",42,"Snacks","🥠"],
+["Lijjat Papad 100g Big",42,"Snacks","🥠"],
+["Lijjat Papad 200g Small",80,"Snacks","🥠"],
+["Lijjat Papad 200g Big",80,"Snacks","🥠"],
+
+["Amul Taaza 1 kg",59,"Dairy","🥛"],
+["Amul Gold 1 kg",72,"Dairy","🥛"],
+["Amul Dahi ₹10",10,"Dairy","🥣"],
+["Amul Dahi ₹20",20,"Dairy","🥣"],
+["Amul Dahi ₹25",25,"Dairy","🥣"],
+["Nandini Dahi 500g",40,"Dairy","🥣"],
+["Amul Gold 500g",36,"Dairy","🥛"],
+["Amul Taaza 500g",30,"Dairy","🥛"]
+];
+
+let cart = {};
+let category = "All";
+let customerDistance = null;
+
+function setCategory(name,btn){
+ category=name;
+ document.querySelectorAll(".categories button").forEach(b=>b.classList.remove("active"));
+ btn.classList.add("active");
+ showProducts();
+}
+
+function showProducts(){
+ const search=document.getElementById("search").value.toLowerCase();
+ const box=document.getElementById("products");
+ box.innerHTML="";
+ products.forEach((p,i)=>{
+  if((category==="All"||p[2]===category)&&p[0].toLowerCase().includes(search)){
+   box.innerHTML+=`
+    <div class="product">
+     <div class="emoji">${p[3]}</div>
+     <h3>${p[0]}</h3>
+     <div class="price">₹${p[1]}</div>
+     <button onclick="addToCart(${i})">Add to Cart</button>
+    </div>`;
+  }
+ });
+}
+
+function addToCart(i){
+ cart[i]=(cart[i]||0)+1;
+ updateCart();
+}
+
+function changeQty(i,amount){
+ cart[i]+=amount;
+ if(cart[i]<=0)delete cart[i];
+ updateCart();
+}
+
+function getSubtotal(){
+ return Object.keys(cart).reduce((sum,i)=>sum+products[i][1]*cart[i],0);
+}
+
+function updateCart(){
+ const box=document.getElementById("cartItems");
+ box.innerHTML="";
+ let count=0;
+ Object.keys(cart).forEach(i=>{
+  const p=products[i],qty=cart[i];
+  count+=qty;
+  box.innerHTML+=`
+   <div class="cart-item">
+    <div>${p[3]} ${p[0]}<br>₹${p[1]} × ${qty}</div>
+    <div>
+     <button onclick="changeQty(${i},-1)">−</button>
+     <button onclick="changeQty(${i},1)">+</button>
+    </div>
+   </div>`;
+ });
+ if(count===0)box.innerHTML="Cart is empty";
+ document.getElementById("count").textContent=count;
+ document.getElementById("subtotal").textContent=getSubtotal();
+ updateBill();
+}
+
+function getDeliveryCharge(){
+ const subtotal=getSubtotal();
+ if(subtotal>=FREE_DELIVERY_LIMIT)return 0;
+ if(customerDistance===null)return 0;
+ if(customerDistance<=1)return 9;
+ if(customerDistance<5)return 25;
+ return 39;
+}
+
+function updateBill(){
+ const payment=document.getElementById("payment").value;
+ document.getElementById("qr").style.display=
+  payment==="Online Payment"?"block":"none";
+
+ const subtotal=getSubtotal();
+ const delivery=getDeliveryCharge();
+ document.getElementById("delivery").textContent=delivery;
+ document.getElementById("grandTotal").textContent=subtotal+delivery;
+ document.getElementById("deliveryMessage").textContent=
+  subtotal>=FREE_DELIVERY_LIMIT
+   ?"🎉 FREE DELIVERY!"
+   :customerDistance===null
+    ?"Location detect karein. ₹199 ya usse zyada par free delivery."
+    :"Delivery charge location ke hisaab se calculate hua hai.";
+}
+
+function distanceKm(lat1,lon1,lat2,lon2){
+ const R=6371;
+ const dLat=(lat2-lat1)*Math.PI/180;
+ const dLon=(lon2-lon1)*Math.PI/180;
+ const a=Math.sin(dLat/2)**2+
+  Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*
+  Math.sin(dLon/2)**2;
+ return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+async function getShopCoordinates(){
+ const url="https://nominatim.openstreetmap.org/search?format=json&limit=1&q="+
+  encodeURIComponent(SHOP_ADDRESS);
+ const response=await fetch(url);
+ if(!response.ok)throw new Error("Shop location search failed");
+ const results=await response.json();
+ if(!results.length)throw new Error("Shop location nahi mili");
+ return {
+  lat:Number(results[0].lat),
+  lon:Number(results[0].lon)
+ };
+}
+
+function detectLocation(){
+ const status=document.getElementById("locationStatus");
+ if(!navigator.geolocation){
+  status.textContent="Aapke browser mein location available nahi hai.";
+  return;
+ }
+ status.textContent="Location detect ho rahi hai...";
+ navigator.geolocation.getCurrentPosition(async position=>{
+  try{
+   const shop=await getShopCoordinates();
+   const customer=position.coords;
+   customerDistance=distanceKm(
+    shop.lat,shop.lon,customer.latitude,customer.longitude
+   );
+   document.getElementById("distanceText").textContent=
+    customerDistance.toFixed(2)+" km (approx.)";
+   status.textContent="✅ Location detect ho gayi!";
+   updateBill();
+  }catch(error){
+   customerDistance=null;
+   status.textContent="Shop location nahi mil paayi. Internet check karein.";
+   updateBill();
+  }
+ },error=>{
+  status.textContent="Location permission dein aur dobara try karein.";
+ },{enableHighAccuracy:true,timeout:20000,maximumAge:0});
+}
+
+function previewScreenshot(){
+ const file=document.getElementById("screenshot").files[0];
+ const preview=document.getElementById("screenshotPreview");
+ if(file){
+  preview.src=URL.createObjectURL(file);
+  preview.style.display="block";
+ }else{
+  preview.style.display="none";
+ }
+}
+
+function confirmOrder(){
+ if(Object.keys(cart).length===0){
+  alert("Please add products to cart.");
+  return;
+ }
+ const name=document.getElementById("customerName").value.trim();
+ const phone=document.getElementById("phone").value.trim();
+ const address=document.getElementById("address").value.trim();
+ const payment=document.getElementById("payment").value;
+ const screenshot=document.getElementById("screenshot").files[0];
+ const subtotal=getSubtotal();
+
+ if(!name||!phone||!address||!payment){
+  alert("Please fill all customer details and select payment method.");
+  return;
+ }
+ if(!/^[0-9]{10}$/.test(phone)){
+  alert("Please enter a valid 10-digit mobile number.");
+  return;
+ }
+ if(subtotal<FREE_DELIVERY_LIMIT&&customerDistance===null){
+  alert("Please detect your location before ordering.");
+  return;
+ }
+ if(payment==="Online Payment"&&!screenshot){
+  alert("Online payment ke liye screenshot upload karein.");
+  return;
+ }
+
+ const delivery=getDeliveryCharge();
+ let lines=[
+  "🛒 NEW ORDER - Vaibhav Laxmi provision Store",
+  "",
+  "Name: "+name,
+  "Mobile: "+phone,
+  "Address: "+address,
+  "",
+  "Items:"
+ ];
+ Object.keys(cart).forEach(i=>{
+  const p=products[i];
+  lines.push(p[0]+" x "+cart[i]+" = ₹"+(p[1]*cart[i]));
+ });
+ lines.push("");
+ lines.push("Subtotal: ₹"+subtotal);
+ lines.push("Distance: "+(customerDistance===null?"Not needed (free delivery)":customerDistance.toFixed(2)+" km approx."));
+ lines.push("Delivery: ₹"+delivery);
+ lines.push("Grand Total: ₹"+(subtotal+delivery));
+ lines.push("Payment: "+payment);
+ if(payment==="Online Payment"){
+  lines.push("Payment screenshot customer will attach in WhatsApp.");
+ }else{
+  lines.push("Payment at delivery.");
+ }
+ const url="https://wa.me/"+WHATSAPP+"?text="+encodeURIComponent(lines.join("\n"));
+ window.open(url,"_blank");
+ if(payment==="Online Payment"){
+  alert("WhatsApp open hone ke baad payment screenshot attach karke order send karein.");
+ }
+}
+
+showProducts();
+updateCart();
+</script>
+</body>
+</html>
